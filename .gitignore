@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+tmp/
+out/
+
+# Android Studio / IDEA
+.idea/
+*.iml
+
+# Local configuration (contains paths specific to this machine)
+local.properties
+
+# Generated icons
+app/src/main/res/mipmap-*
+
+# Keep launcher icons
+!app/src/main/res/mipmap-*/
+
+# Logs
+*.log
+
+# Temporary build scripts
+run_build*.ps1
+run_build*.bat
+generate_icons.ps1
+check_tasks.ps1
