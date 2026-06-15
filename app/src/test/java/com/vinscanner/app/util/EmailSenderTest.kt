@@ -14,13 +14,13 @@ class EmailSenderTest {
         val body = EmailSender.buildBody(records)
         assertTrue(body.contains("LSGPC54U3KD123456"))
         assertTrue(body.contains("LSGPC54U3KD123457"))
-        assertTrue(body.contains("共计 2 条"))
+        assertTrue(body.contains("共计 2 条。"))
         assertTrue(body.contains("VinScanner"))
     }
 
     @Test fun `buildBody with empty list still shows header and footer`() {
         val body = EmailSender.buildBody(emptyList())
         assertTrue(body.contains("VIN"))
-        assertTrue(body.contains("共计 0 条"))
+        assertTrue(body.contains("共计 0 条。"))
     }
 }

@@ -12,24 +12,40 @@ import androidx.core.content.ContextCompat
 import com.google.zxing.ResultPoint
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
+import com.journeyapps.barcodescanner.CameraPreview
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import com.vinscanner.app.R
 import com.vinscanner.app.util.VinValidator
 
-/**
- * 二维码扫描Activity，使用ZXing库。
- * 扫码成功后通过EXTRA_SCAN_RESULT返回VIN码。
- */
 class ScanActivity : AppCompatActivity() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
     private lateinit var hintView: TextView
+    private var isScanning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan)
         barcodeView = findViewById(R.id.barcode_scanner)
         hintView = findViewById(R.id.scan_hint)
+        barcodeView.getBarcodeView().addStateListener(object : CameraPreview.StateListener {
+            override fun previewSized() = Unit
+            override fun previewStarted() = Unit
+            override fun previewStopped() = Unit
+            override fun cameraClosed() = Unit
+
+            override fun cameraError(error: Exception) {
+                runOnUiThread {
+                    stopScanning()
+                    Toast.makeText(
+                        this@ScanActivity,
+                        R.string.toast_camera_open_failed,
+                        Toast.LENGTH_LONG
+                    ).show()
+                    finish()
+                }
+            }
+        })
 
         if (!hasCameraPermission()) {
             requestCameraPermission()
@@ -39,7 +55,9 @@ class ScanActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQ_CAMERA) {
@@ -62,11 +80,14 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun startScanning() {
+        if (isScanning) return
+        isScanning = true
         barcodeView.decodeContinuous(object : BarcodeCallback {
             override fun barcodeResult(result: BarcodeResult?) {
                 val text = result?.text ?: return
                 val vin = VinValidator.normalize(text)
                 if (vin.isBlank()) return
+                stopScanning()
                 val data = Intent().apply { putExtra(EXTRA_SCAN_RESULT, vin) }
                 setResult(RESULT_OK, data)
                 finish()
@@ -79,12 +100,21 @@ class ScanActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasCameraPermission() && ::barcodeView.isInitialized) barcodeView.resume()
+        if (hasCameraPermission() && ::barcodeView.isInitialized) {
+            startScanning()
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        if (::barcodeView.isInitialized) barcodeView.pause()
+        stopScanning()
+    }
+
+    private fun stopScanning() {
+        if (!::barcodeView.isInitialized) return
+        barcodeView.getBarcodeView().stopDecoding()
+        barcodeView.pause()
+        isScanning = false
     }
 
     companion object {

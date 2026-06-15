@@ -8,38 +8,40 @@
     <string name="action_settings">设置</string>
     <string name="action_clear">清空列表</string>
 
-    <string name="empty_hint">暂无VIN记录，点击下方按钮添加</string>
+    <string name="empty_hint">暂无 VIN 记录，点击下方按钮添加</string>
     <string name="settings_title">设置</string>
     <string name="settings_email_key">pref_email</string>
     <string name="settings_email_title">收件邮箱</string>
-    <string name="settings_email_summary">用于接收VIN列表的邮箱地址</string>
+    <string name="settings_email_summary">用于接收 VIN 列表的邮箱地址</string>
     <string name="settings_subject_key">pref_subject</string>
     <string name="settings_subject_title">邮件主题</string>
     <string name="settings_subject_summary">发送邮件时使用的主题</string>
-    <string name="settings_default_subject">VIN码列表</string>
+    <string name="settings_default_subject">VIN 码列表</string>
 
-    <string name="dialog_input_title">输入VIN码</string>
-    <string name="dialog_input_hint">请输入17位VIN码</string>
-    <string name="dialog_invalid_vin">VIN码格式不正确（应为17位数字或字母，不含I/O/Q）</string>
-    <string name="dialog_duplicate_vin">该VIN码已存在于列表中</string>
+    <string name="dialog_input_title">输入 VIN 码</string>
+    <string name="dialog_input_hint">请输入 17 位 VIN 码</string>
+    <string name="dialog_invalid_vin">VIN 码格式不正确（应为 17 位数字或字母，且不含 I/O/Q）</string>
+    <string name="dialog_duplicate_vin">该 VIN 码已存在于列表中</string>
+    <string name="dialog_delete_confirm">确认删除此条 VIN：\n%1$s</string>
     <string name="dialog_email_no_address">请先在设置中配置收件邮箱</string>
     <string name="dialog_email_no_app">未检测到邮件应用，请安装邮件客户端后重试</string>
-    <string name="dialog_email_no_data">列表为空，没有可发送的VIN</string>
-    <string name="dialog_clear_confirm">确认清空所有VIN记录？此操作不可撤销。</string>
+    <string name="dialog_email_no_data">列表为空，没有可发送的 VIN</string>
+    <string name="dialog_clear_confirm">确认清空所有 VIN 记录？此操作不可撤销。</string>
 
     <string name="toast_scan_success">扫码成功：%1$s</string>
-    <string name="toast_input_success">VIN码已添加</string>
+    <string name="toast_input_success">VIN 码已添加</string>
     <string name="toast_copied">已复制到剪贴板</string>
     <string name="toast_deleted">已删除</string>
     <string name="toast_camera_permission_denied">需要相机权限才能扫描二维码</string>
+    <string name="toast_camera_open_failed">相机启动失败，请检查相机权限或是否被其他应用占用</string>
     <string name="toast_clear_success">列表已清空</string>
 
     <string name="scan_hint">请将二维码置于扫描框内</string>
-    <string name="scan_title">扫描VIN二维码</string>
+    <string name="scan_title">扫描 VIN 二维码</string>
     <string name="source_scan">扫码</string>
     <string name="source_input">手动</string>
 
     <string name="item_count">共 %1$d 条</string>
-    <string name="email_body_header">以下为本次采集的车辆VIN码列表：\n\n</string>
+    <string name="email_body_header">以下为本次采集的车辆 VIN 码列表：\n\n</string>
     <string name="email_body_footer">\n\n—— 来自 VinScanner Android App</string>
 </resources>

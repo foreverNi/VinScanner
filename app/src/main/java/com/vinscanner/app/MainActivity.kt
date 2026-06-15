@@ -5,7 +5,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -14,9 +16,9 @@ import com.vinscanner.app.data.VinRecord
 import com.vinscanner.app.data.VinRepository
 import com.vinscanner.app.databinding.ActivityMainBinding
 import com.vinscanner.app.ui.input.InputDialogFragment
+import com.vinscanner.app.ui.list.VinListAdapter
 import com.vinscanner.app.ui.scan.ScanActivity
 import com.vinscanner.app.ui.settings.SettingsActivity
-import com.vinscanner.app.ui.list.VinListAdapter
 import com.vinscanner.app.util.EmailSender
 import com.vinscanner.app.viewmodel.VinViewModel
 import com.vinscanner.app.viewmodel.VinViewModelFactory
@@ -29,10 +31,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var repository: VinRepository
 
     private val scanLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            val vin = result.data?.getStringExtra(ScanActivity.EXTRA_SCAN_RESULT) ?: return@registerForActivityResult
+            val vin = result.data?.getStringExtra(ScanActivity.EXTRA_SCAN_RESULT)
+                ?: return@registerForActivityResult
             addVin(vin, getString(R.string.source_scan))
         }
     }
@@ -45,7 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         repository = VinRepository(this)
         viewModel = ViewModelProvider(
-            this, VinViewModelFactory(repository)
+            this,
+            VinViewModelFactory(repository)
         )[VinViewModel::class.java]
 
         adapter = VinListAdapter(
@@ -58,8 +62,8 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.records.observe(this) { list ->
             adapter.submitList(list)
-            binding.emptyView.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-            binding.tvCount.text = String.format(getString(R.string.item_count), list.size)
+            binding.emptyView.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+            binding.tvCount.text = getString(R.string.item_count, list.size)
         }
 
         binding.fabScan.setOnClickListener {
@@ -86,7 +90,7 @@ class MainActivity : AppCompatActivity() {
     private fun addVin(vin: String, source: String) {
         val record = VinRecord(vin, System.currentTimeMillis(), source)
         if (viewModel.add(record)) {
-            Toast.makeText(this, String.format(getString(R.string.toast_scan_success), vin), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_scan_success, vin), Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, R.string.dialog_duplicate_vin, Toast.LENGTH_SHORT).show()
         }
@@ -101,7 +105,7 @@ class MainActivity : AppCompatActivity() {
     private fun confirmDelete(record: VinRecord, pos: Int) {
         AlertDialog.Builder(this)
             .setTitle(R.string.app_name)
-            .setMessage("确认删除此条 VIN：\n${record.vin}？")
+            .setMessage(getString(R.string.dialog_delete_confirm, record.vin))
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 viewModel.removeAt(pos)
                 Toast.makeText(this, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
@@ -135,7 +139,10 @@ class MainActivity : AppCompatActivity() {
         }
         val prefs = getSharedPreferences("vin_scanner_settings", MODE_PRIVATE)
         val email = prefs.getString(getString(R.string.settings_email_key), "") ?: ""
-        val subject = prefs.getString(getString(R.string.settings_subject_key), getString(R.string.settings_default_subject)) ?: getString(R.string.settings_default_subject)
+        val subject = prefs.getString(
+            getString(R.string.settings_subject_key),
+            getString(R.string.settings_default_subject)
+        ) ?: getString(R.string.settings_default_subject)
         if (email.isBlank()) {
             Toast.makeText(this, R.string.dialog_email_no_address, Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, SettingsActivity::class.java))
