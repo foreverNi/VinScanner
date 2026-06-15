@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -85,6 +86,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         binding.btnClear.setOnClickListener { confirmClear() }
+
+        showLastCrashIfAny()
     }
 
     private fun addVin(vin: String, source: String) {
@@ -154,5 +157,25 @@ class MainActivity : AppCompatActivity() {
             return
         }
         startActivity(intent)
+    }
+
+    private fun showLastCrashIfAny() {
+        val prefs = getSharedPreferences(VinScannerApp.PREFS_NAME, MODE_PRIVATE)
+        val lastCrash = prefs.getString(VinScannerApp.KEY_LAST_CRASH, null) ?: return
+        val stack = prefs.getString(VinScannerApp.KEY_LAST_CRASH_STACK, null).orEmpty()
+        Log.e(TAG, "Last crash: $lastCrash\n$stack")
+        prefs.edit()
+            .remove(VinScannerApp.KEY_LAST_CRASH)
+            .remove(VinScannerApp.KEY_LAST_CRASH_STACK)
+            .apply()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.error_last_crash_title)
+            .setMessage(getString(R.string.error_last_crash_message, lastCrash))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    companion object {
+        private const val TAG = "VinScannerMain"
     }
 }

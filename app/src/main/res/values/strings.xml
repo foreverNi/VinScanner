@@ -35,6 +35,12 @@
     <string name="toast_camera_permission_denied">需要相机权限才能扫描二维码</string>
     <string name="toast_camera_open_failed">相机启动失败，请检查相机权限或是否被其他应用占用</string>
     <string name="toast_clear_success">列表已清空</string>
+    <string name="error_scan_init_title">扫码启动失败</string>
+    <string name="error_scan_init_message">扫码组件初始化失败，请重启应用后重试。\n\n错误信息：%1$s</string>
+    <string name="error_camera_title">相机启动失败</string>
+    <string name="error_camera_message">无法打开相机，请检查相机权限，或确认相机没有被其他应用占用。\n\n错误信息：%1$s</string>
+    <string name="error_last_crash_title">检测到上次异常退出</string>
+    <string name="error_last_crash_message">上次异常信息：\n%1$s</string>
 
     <string name="scan_hint">请将二维码置于扫描框内</string>
     <string name="scan_title">扫描 VIN 二维码</string>

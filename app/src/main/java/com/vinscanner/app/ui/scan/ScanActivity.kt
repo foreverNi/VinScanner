@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,7 +27,17 @@ class ScanActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_scan)
+        Log.i(TAG, "ScanActivity onCreate")
+        try {
+            setContentView(R.layout.activity_scan)
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Failed to inflate scan layout", error)
+            showFatalScanError(
+                titleRes = R.string.error_scan_init_title,
+                message = getString(R.string.error_scan_init_message, error.message ?: error.javaClass.simpleName)
+            )
+            return
+        }
         barcodeView = findViewById(R.id.barcode_scanner)
         hintView = findViewById(R.id.scan_hint)
         barcodeView.getBarcodeView().addStateListener(object : CameraPreview.StateListener {
@@ -35,14 +47,16 @@ class ScanActivity : AppCompatActivity() {
             override fun cameraClosed() = Unit
 
             override fun cameraError(error: Exception) {
+                Log.e(TAG, "Camera error", error)
                 runOnUiThread {
                     stopScanning()
-                    Toast.makeText(
-                        this@ScanActivity,
-                        R.string.toast_camera_open_failed,
-                        Toast.LENGTH_LONG
-                    ).show()
-                    finish()
+                    showFatalScanError(
+                        titleRes = R.string.error_camera_title,
+                        message = getString(
+                            R.string.error_camera_message,
+                            error.message ?: error.javaClass.simpleName
+                        )
+                    )
                 }
             }
         })
@@ -62,8 +76,10 @@ class ScanActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQ_CAMERA) {
             if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Camera permission granted")
                 startScanning()
             } else {
+                Log.w(TAG, "Camera permission denied")
                 Toast.makeText(this, R.string.toast_camera_permission_denied, Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -81,21 +97,32 @@ class ScanActivity : AppCompatActivity() {
 
     private fun startScanning() {
         if (isScanning) return
+        Log.i(TAG, "Starting scan")
         isScanning = true
-        barcodeView.decodeContinuous(object : BarcodeCallback {
-            override fun barcodeResult(result: BarcodeResult?) {
-                val text = result?.text ?: return
-                val vin = VinValidator.normalize(text)
-                if (vin.isBlank()) return
-                stopScanning()
-                val data = Intent().apply { putExtra(EXTRA_SCAN_RESULT, vin) }
-                setResult(RESULT_OK, data)
-                finish()
-            }
+        try {
+            barcodeView.decodeContinuous(object : BarcodeCallback {
+                override fun barcodeResult(result: BarcodeResult?) {
+                    val text = result?.text ?: return
+                    val vin = VinValidator.normalize(text)
+                    if (vin.isBlank()) return
+                    Log.i(TAG, "Scan result received")
+                    stopScanning()
+                    val data = Intent().apply { putExtra(EXTRA_SCAN_RESULT, vin) }
+                    setResult(RESULT_OK, data)
+                    finish()
+                }
 
-            override fun possibleResultPoints(resultPoints: MutableList<ResultPoint>?) {}
-        })
-        barcodeView.resume()
+                override fun possibleResultPoints(resultPoints: MutableList<ResultPoint>?) {}
+            })
+            barcodeView.resume()
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Failed to start scan", error)
+            isScanning = false
+            showFatalScanError(
+                titleRes = R.string.error_scan_init_title,
+                message = getString(R.string.error_scan_init_message, error.message ?: error.javaClass.simpleName)
+            )
+        }
     }
 
     override fun onResume() {
@@ -112,12 +139,24 @@ class ScanActivity : AppCompatActivity() {
 
     private fun stopScanning() {
         if (!::barcodeView.isInitialized) return
+        Log.i(TAG, "Stopping scan")
         barcodeView.getBarcodeView().stopDecoding()
         barcodeView.pause()
         isScanning = false
     }
 
+    private fun showFatalScanError(titleRes: Int, message: String) {
+        if (isFinishing || isDestroyed) return
+        AlertDialog.Builder(this)
+            .setTitle(titleRes)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok) { _, _ -> finish() }
+            .setOnCancelListener { finish() }
+            .show()
+    }
+
     companion object {
+        private const val TAG = "VinScannerScan"
         const val REQ_CAMERA = 1001
         const val EXTRA_SCAN_RESULT = "extra_scan_result"
     }
