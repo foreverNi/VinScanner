@@ -16,7 +16,7 @@ class VinViewModel(private val repository: VinRepository) : ViewModel() {
     }
 
     fun refresh() {
-        _records.postValue(repository.getAll())
+        _records.value = repository.getAll()
     }
 
     fun add(record: VinRecord): Boolean {
@@ -37,6 +37,12 @@ class VinViewModel(private val repository: VinRepository) : ViewModel() {
         return removed
     }
 
+    fun updateVinAt(index: Int, newVin: String): Boolean {
+        val updated = repository.updateVinAt(index, newVin)
+        if (updated) refresh()
+        return updated
+    }
+
     fun clearAll() {
         repository.clear()
         refresh()
@@ -45,4 +51,7 @@ class VinViewModel(private val repository: VinRepository) : ViewModel() {
     fun count(): Int = records.value?.size ?: repository.count()
 
     fun contains(vin: String): Boolean = repository.contains(vin)
+
+    fun containsExceptIndex(vin: String, excludedIndex: Int): Boolean =
+        repository.containsExceptIndex(vin, excludedIndex)
 }

@@ -64,6 +64,32 @@ class VinRepositoryTest {
         assertEquals(1, repository.count())
         assertFalse(repository.contains("LSGPC54U3KD123456"))
     }
+
+    @Test fun `updateVinAt changes vin and keeps metadata`() {
+        repository.add(VinRecord("LSGPC54U3KD123456", 1000L, "scan"))
+
+        assertTrue(repository.updateVinAt(0, "LSGPC54U3KD654321"))
+
+        val record = repository.getAll()[0]
+        assertEquals("LSGPC54U3KD654321", record.vin)
+        assertEquals(1000L, record.timestamp)
+        assertEquals("scan", record.source)
+    }
+
+    @Test fun `updateVinAt rejects duplicate vin`() {
+        repository.add(VinRecord("LSGPC54U3KD123456", 1000L, "scan"))
+        repository.add(VinRecord("LSGPC54U3KD123457", 2000L, "manual"))
+
+        assertFalse(repository.updateVinAt(0, "LSGPC54U3KD123456"))
+        assertEquals("LSGPC54U3KD123457", repository.getAll()[0].vin)
+    }
+
+    @Test fun `updateVinAt rejects invalid index`() {
+        repository.add(VinRecord("LSGPC54U3KD123456", 1000L, "scan"))
+
+        assertFalse(repository.updateVinAt(1, "LSGPC54U3KD654321"))
+        assertEquals("LSGPC54U3KD123456", repository.getAll()[0].vin)
+    }
 }
 
 internal class InMemoryPrefs(private val map: MutableMap<String, String>) : android.content.SharedPreferences {

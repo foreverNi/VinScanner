@@ -1,11 +1,10 @@
 package com.vinscanner.app
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.vinscanner.app.data.VinRecord
 import com.vinscanner.app.data.VinRepository
 import com.vinscanner.app.databinding.ActivityMainBinding
+import com.vinscanner.app.ui.edit.VinEditActivity
 import com.vinscanner.app.ui.input.InputDialogFragment
 import com.vinscanner.app.ui.list.VinListAdapter
 import com.vinscanner.app.ui.scan.ScanActivity
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         )[VinViewModel::class.java]
 
         adapter = VinListAdapter(
-            onItemClick = { record, _ -> copyToClipboard(record.vin) },
+            onItemClick = { record, pos -> openEdit(record, pos) },
             onItemLongClick = { record, pos -> confirmDelete(record, pos) }
         )
 
@@ -82,12 +82,29 @@ class MainActivity : AppCompatActivity() {
             dialog.show(supportFragmentManager, "input_dialog")
         }
         binding.btnEmail.setOnClickListener { sendEmail() }
-        binding.btnSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
         binding.btnClear.setOnClickListener { confirmClear() }
 
         showLastCrashIfAny()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun addVin(vin: String, source: String) {
@@ -99,10 +116,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun copyToClipboard(text: String) {
-        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        cm.setPrimaryClip(ClipData.newPlainText("VIN", text))
-        Toast.makeText(this, R.string.toast_copied, Toast.LENGTH_SHORT).show()
+    private fun openEdit(record: VinRecord, pos: Int) {
+        val intent = Intent(this, VinEditActivity::class.java).apply {
+            putExtra(VinEditActivity.EXTRA_VIN_INDEX, pos)
+            putExtra(VinEditActivity.EXTRA_VIN_VALUE, record.vin)
+        }
+        startActivity(intent)
     }
 
     private fun confirmDelete(record: VinRecord, pos: Int) {

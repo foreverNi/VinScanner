@@ -46,6 +46,18 @@ class VinRepository(private val sharedPreferences: SharedPreferences) {
         return removed
     }
 
+    fun updateVinAt(index: Int, newVin: String): Boolean {
+        val current = getAll().toMutableList()
+        if (index < 0 || index >= current.size) return false
+        if (current.withIndex().any { (itemIndex, record) -> itemIndex != index && record.vin == newVin }) {
+            return false
+        }
+        val record = current[index]
+        current[index] = record.copy(vin = newVin)
+        save(current)
+        return true
+    }
+
     fun clear() {
         sharedPreferences.edit().remove(KEY_RECORDS).apply()
     }
@@ -53,6 +65,10 @@ class VinRepository(private val sharedPreferences: SharedPreferences) {
     fun count(): Int = getAll().size
 
     fun contains(vin: String): Boolean = getAll().any { it.vin == vin }
+
+    fun containsExceptIndex(vin: String, excludedIndex: Int): Boolean {
+        return getAll().withIndex().any { (index, record) -> index != excludedIndex && record.vin == vin }
+    }
 
     private fun save(list: List<VinRecord>) {
         sharedPreferences.edit().putString(KEY_RECORDS, gson.toJson(list)).apply()

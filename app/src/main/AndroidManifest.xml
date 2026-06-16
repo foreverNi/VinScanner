@@ -40,6 +40,12 @@
             android:label="@string/settings_title"
             android:theme="@style/Theme.VinScanner" />
 
+        <activity
+            android:name=".ui.edit.VinEditActivity"
+            android:exported="false"
+            android:label="@string/edit_title"
+            android:theme="@style/Theme.VinScanner" />
+
     </application>
 
 </manifest>

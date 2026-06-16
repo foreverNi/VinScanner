@@ -53,4 +53,21 @@ class VinViewModelTest {
         assertTrue(viewModel.removeAt(1))
         assertEquals(1, viewModel.count())
     }
+
+    @Test fun `updateVinAt updates livedata`() {
+        viewModel.add(VinRecord("LSGPC54U3KD123456", 1000L, "scan"))
+
+        assertTrue(viewModel.updateVinAt(0, "LSGPC54U3KD654321"))
+
+        assertEquals("LSGPC54U3KD654321", viewModel.records.value?.first()?.vin)
+    }
+
+    @Test fun `updateVinAt rejects duplicate vin`() {
+        viewModel.add(VinRecord("LSGPC54U3KD123456", 1000L, "scan"))
+        viewModel.add(VinRecord("LSGPC54U3KD123457", 2000L, "manual"))
+
+        assertFalse(viewModel.updateVinAt(0, "LSGPC54U3KD123456"))
+
+        assertEquals("LSGPC54U3KD123457", viewModel.records.value?.first()?.vin)
+    }
 }

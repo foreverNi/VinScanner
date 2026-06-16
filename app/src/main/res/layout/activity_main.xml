@@ -53,17 +53,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        app:layout_constraintBottom_toTopOf="@id/action_barrier"
+        app:layout_constraintBottom_toTopOf="@id/action_row"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_count" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/action_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="action_row,fab_scan" />
 
     <LinearLayout
         android:id="@+id/action_row"
@@ -94,15 +87,6 @@
             android:textAllCaps="false" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_settings"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/action_settings"
-            android:textAllCaps="false" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_clear"
             style="?attr/borderlessButtonStyle"
             android:layout_width="0dp"
@@ -119,8 +103,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:contentDescription="@string/action_scan"
+        app:layout_constraintBottom_toTopOf="@id/action_row"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appbar"
         app:srcCompat="@android:drawable/ic_menu_camera" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
