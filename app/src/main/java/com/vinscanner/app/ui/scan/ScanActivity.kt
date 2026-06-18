@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -23,7 +24,10 @@ class ScanActivity : AppCompatActivity() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
     private lateinit var hintView: TextView
+    private lateinit var torchButton: ImageButton
     private var isScanning = false
+    private var torchOn = false
+    private var torchAvailable = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +44,8 @@ class ScanActivity : AppCompatActivity() {
         }
         barcodeView = findViewById(R.id.barcode_scanner)
         hintView = findViewById(R.id.scan_hint)
+        torchButton = findViewById(R.id.torch_button)
+        setupTorch()
         barcodeView.getBarcodeView().addStateListener(object : CameraPreview.StateListener {
             override fun previewSized() = Unit
             override fun previewStarted() = Unit
@@ -95,6 +101,61 @@ class ScanActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQ_CAMERA)
     }
 
+    private fun setupTorch() {
+        barcodeView.setTorchListener(object : DecoratedBarcodeView.TorchListener {
+            override fun onTorchOn() {
+                Log.i(TAG, "Torch on")
+            }
+
+            override fun onTorchOff() {
+                Log.i(TAG, "Torch off")
+            }
+        })
+        // 部分设备/模拟器无闪光灯：通过 PackageManager 检测，无则禁用按钮
+        torchAvailable = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+        if (!torchAvailable) {
+            torchButton.isEnabled = false
+            torchButton.alpha = 0.4f
+        }
+        torchButton.setOnClickListener {
+            if (!torchAvailable) {
+                Toast.makeText(this, R.string.toast_torch_unavailable, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            toggleTorch()
+        }
+        updateTorchButton()
+    }
+
+    private fun toggleTorch() {
+        torchOn = !torchOn
+        try {
+            if (torchOn) {
+                barcodeView.setTorchOn()
+            } else {
+                barcodeView.setTorchOff()
+            }
+        } catch (error: RuntimeException) {
+            Log.e(TAG, "Torch toggle failed", error)
+            torchOn = false
+            torchAvailable = false
+            torchButton.isEnabled = false
+            torchButton.alpha = 0.4f
+            Toast.makeText(this, R.string.toast_torch_unavailable, Toast.LENGTH_SHORT).show()
+        }
+        updateTorchButton()
+    }
+
+    private fun updateTorchButton() {
+        if (torchOn) {
+            torchButton.setImageResource(R.drawable.ic_flash_on)
+            torchButton.contentDescription = getString(R.string.action_torch_off)
+        } else {
+            torchButton.setImageResource(R.drawable.ic_flash_off)
+            torchButton.contentDescription = getString(R.string.action_torch_on)
+        }
+    }
+
     private fun startScanning() {
         if (isScanning) return
         Log.i(TAG, "Starting scan")
@@ -128,6 +189,9 @@ class ScanActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (hasCameraPermission() && ::barcodeView.isInitialized) {
+            // 重新进入时手电筒已随 preview 暂停熄灭，状态复位为默认关闭
+            torchOn = false
+            if (::torchButton.isInitialized) updateTorchButton()
             startScanning()
         }
     }

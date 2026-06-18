@@ -50,6 +50,9 @@
 
     <string name="scan_hint">请将二维码置于扫描框内</string>
     <string name="scan_title">扫描 VIN 二维码</string>
+    <string name="action_torch_on">开启手电筒</string>
+    <string name="action_torch_off">关闭手电筒</string>
+    <string name="toast_torch_unavailable">当前设备不支持手电筒</string>
     <string name="source_scan">扫码</string>
     <string name="source_input">手动</string>
 
