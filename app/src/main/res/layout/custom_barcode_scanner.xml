@@ -28,7 +28,8 @@
         android:layout_marginBottom="16dp"
         android:background="@color/primary_dark"
         android:padding="12dp"
-        android:text="@string/scan_hint"
+        android:text=""
+        android:visibility="gone"
         android:textColor="#ffffff" />
 
 </FrameLayout>
