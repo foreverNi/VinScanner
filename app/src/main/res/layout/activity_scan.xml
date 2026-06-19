@@ -11,26 +11,34 @@
         android:layout_height="match_parent"
         app:zxing_scanner_layout="@layout/custom_barcode_scanner" />
 
-    <TextView
-        android:id="@+id/scan_hint"
+    <!-- 底部控件区：垂直堆叠，按钮在上、提示在下，互不重叠 -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="96dp"
-        android:padding="12dp"
-        android:text="@string/scan_hint"
-        android:textColor="#ffffff"
-        android:textSize="16sp" />
-
-    <ImageButton
-        android:id="@+id/torch_button"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="28dp"
-        android:background="@drawable/torch_button_background"
-        android:contentDescription="@string/action_torch_on"
-        android:src="@drawable/ic_flash_off"
-        android:tint="#ffffff" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/torch_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/torch_button_background"
+            android:contentDescription="@string/action_torch_on"
+            android:src="@drawable/ic_flash_off"
+            android:tint="#ffffff" />
+
+        <TextView
+            android:id="@+id/scan_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="12dp"
+            android:text="@string/scan_hint"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+
+    </LinearLayout>
 
 </FrameLayout>
